@@ -1,0 +1,29 @@
+[
+    {
+        "create": "snippets",
+        "validator": {
+            "$jsonSchema": {
+                "bsonType": "object",
+                "required": [
+                    "_id",
+                    "snippet",
+                    "language"
+                ],
+                "properties": {
+                    "_id": {
+                        "bsonType": "string",
+                        "description": "ID of snippet"
+                    },
+                    "snippet": {
+                        "bsonType": "string",
+                        "description": "snippet"
+                    },
+                    "language": {
+                        "bsonType": "string",
+                        "description": "snippet language"
+                    }
+                }
+            }
+        }
+    }
+]

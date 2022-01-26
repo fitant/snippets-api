@@ -1,0 +1,32 @@
+[
+    {
+        "create": "eph_snippets",
+        "capped": true,
+        "size": 100000000,
+        "max": 10,
+        "validator": {
+            "$jsonSchema": {
+                "bsonType": "object",
+                "required": [
+                    "_id",
+                    "snippet",
+                    "language"
+                ],
+                "properties": {
+                    "_id": {
+                        "bsonType": "string",
+                        "description": "ID of snippet"
+                    },
+                    "snippet": {
+                        "bsonType": "string",
+                        "description": "snippet"
+                    },
+                    "language": {
+                        "bsonType": "string",
+                        "description": "snippet language"
+                    }
+                }
+            }
+        }
+    }
+]
