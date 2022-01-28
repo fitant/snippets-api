@@ -1,4 +1,4 @@
-package web
+package http
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/fitant/xbin-api/config"
 	"github.com/fitant/xbin-api/src/service"
 	"github.com/fitant/xbin-api/src/view"
-	"github.com/fitant/xbin-api/src/view/web/router"
+	"github.com/fitant/xbin-api/src/view/http/router"
 	"go.uber.org/zap"
 )
 

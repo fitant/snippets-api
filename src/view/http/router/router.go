@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/fitant/xbin-api/src/service"
-	"github.com/fitant/xbin-api/src/view/web/handler/snippet"
-	"github.com/fitant/xbin-api/src/view/web/middleware"
+	"github.com/fitant/xbin-api/src/view/http/handler/snippet"
+	"github.com/fitant/xbin-api/src/view/http/middleware"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )

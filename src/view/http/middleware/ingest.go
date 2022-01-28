@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fitant/xbin-api/src/view/web/contract"
+	"github.com/fitant/xbin-api/src/view/http/contract"
 )
 
 func WithIngestion() func(h http.Handler) http.Handler {

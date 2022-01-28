@@ -12,7 +12,7 @@ import (
 	"github.com/fitant/xbin-api/src/service"
 	"github.com/fitant/xbin-api/src/utils"
 	"github.com/fitant/xbin-api/src/view"
-	"github.com/fitant/xbin-api/src/view/web"
+	"github.com/fitant/xbin-api/src/view/http"
 	"go.uber.org/zap"
 )
 
@@ -29,10 +29,10 @@ func main() {
 	svc := service.NewSnippetService(sc, lgr)
 
 	// Initialise and start serving webview
-	webView := web.Init(svc, &cfg.Http, lgr)
-	webView.Serve()
+	httpView := http.Init(svc, &cfg.Http, lgr)
+	httpView.Serve()
 
-	gracefulShutdown([]view.View{webView}, lgr)
+	gracefulShutdown([]view.View{httpView}, lgr)
 }
 
 func gracefulShutdown(views []view.View, logger *zap.Logger) {

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/fitant/xbin-api/src/service"
-	"github.com/fitant/xbin-api/src/view/web/contract"
+	"github.com/fitant/xbin-api/src/view/http/contract"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
