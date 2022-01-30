@@ -16,7 +16,7 @@ func Create(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) 
 	return func(w http.ResponseWriter, req *http.Request) {
 		data := req.Context().Value(contract.CS).(contract.CreateSnippet)
 
-		snippet, err := svc.CreateSnippet(data.Snippet, data.Metadata.Language, data.Metadata.Ephemeral)
+		snippet, err := svc.CreateSnippet(data.Data.Snippet, data.Metadata.Language, data.Metadata.Ephemeral)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -46,7 +46,17 @@ func Get(svc service.Service, lgr *zap.Logger, responseType string) http.Handler
 			return
 		}
 
-		raw, _ := json.Marshal(snippet)
+		resp := contract.CreateSnippet{
+			Data: contract.Data{
+				Snippet: snippet.Snippet,
+			},
+			Metadata: contract.Metadata{
+				Language:  snippet.Language,
+				Ephemeral: snippet.Ephemeral,
+			},
+		}
+
+		raw, _ := json.Marshal(resp)
 		w.Write(raw)
 	}
 }

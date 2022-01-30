@@ -13,7 +13,12 @@ type SnippetController interface {
 	FindSnippet(name string) (*Snippet, error)
 }
 
-type Snippet db.InsertSnippetQuery
+type Snippet struct {
+	ID        string
+	Ephemeral bool
+	Snippet   string
+	Language  string
+}
 
 type mongoSnippetController struct {
 	db  *db.MongoFindInsert
@@ -51,9 +56,10 @@ func (msc *mongoSnippetController) NewSnippet(id, snip, language string, ephemer
 
 	// Create new Snippet and return
 	return &Snippet{
-		ID:       data.ID,
-		Snippet:  data.Snippet,
-		Language: data.Language,
+		ID:        data.ID,
+		Snippet:   data.Snippet,
+		Language:  data.Language,
+		Ephemeral: ephemeral,
 	}, nil
 }
 
@@ -68,14 +74,16 @@ func (msc *mongoSnippetController) FindSnippet(id string) (*Snippet, error) {
 		return nil, err
 	}
 
-	res, err := msc.db.FindOne(query, false)
+	ephemeral := false
+	res, err := msc.db.FindOne(query, ephemeral)
 	if err != nil && err != db.ErrNoDocuments {
 		msc.lgr.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [static] [toBSON]", err))
 		return nil, err
 	}
 
 	if err == db.ErrNoDocuments {
-		res, err = msc.db.FindOne(query, true)
+		ephemeral = true
+		res, err = msc.db.FindOne(query, ephemeral)
 		if err != nil {
 			if err == db.ErrNoDocuments {
 				return nil, err
@@ -97,6 +105,7 @@ func (msc *mongoSnippetController) FindSnippet(id string) (*Snippet, error) {
 	var snippet Snippet
 	bson.Unmarshal(raw, &snippet)
 
+	snippet.Ephemeral = ephemeral
 	// Create new Snippet and return
 	return &snippet, nil
 }

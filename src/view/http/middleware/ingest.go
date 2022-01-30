@@ -18,7 +18,6 @@ func WithIngestion() func(h http.Handler) http.Handler {
 			data := contract.CreateSnippet{
 				Metadata: contract.Metadata{
 					Ephemeral: true,
-					Language:  "plaintext",
 				},
 			}
 
@@ -28,6 +27,8 @@ func WithIngestion() func(h http.Handler) http.Handler {
 				lang := req.FormValue("language")
 				if lang != "" {
 					data.Metadata.Language = lang
+				} else {
+					data.Metadata.Language = "plaintext"
 				}
 
 				eph := req.FormValue("ephemeral")
@@ -35,6 +36,7 @@ func WithIngestion() func(h http.Handler) http.Handler {
 					data.Metadata.Ephemeral = false
 				}
 
+				// If uploaded file has a content type, use that
 				f, h, err := req.FormFile("snippet")
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
@@ -52,21 +54,27 @@ func WithIngestion() func(h http.Handler) http.Handler {
 
 			raw, _ := ioutil.ReadAll(source)
 
+			if len(raw) == 0 {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
 			if ch == "application/json" {
 				err := json.Unmarshal(raw, &data)
 				if err != nil {
 					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
-				if data.Snippet == "" {
-					data.Snippet = string(raw)
+				if data.Data.Snippet == "" && data.Metadata.Language == "" {
+					data.Data.Snippet = string(raw)
 					data.Metadata.Language = "application/json"
 				}
 			} else {
-				data.Snippet = string(raw)
+				data.Data.Snippet = string(raw)
+				data.Metadata.Language = "plaintext"
 			}
 
-			if data.Snippet == "" {
+			if data.Data.Snippet == "" || data.Metadata.Language == "" {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
