@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/fitant/xbin-api/config"
 	"github.com/fitant/xbin-api/src/service"
 	"github.com/fitant/xbin-api/src/view/http/handler/snippet"
 	"github.com/fitant/xbin-api/src/view/http/middleware"
@@ -8,14 +9,16 @@ import (
 	"go.uber.org/zap"
 )
 
-func New(svc service.Service, lgr *zap.Logger) *chi.Mux {
+func New(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) *chi.Mux {
 	r := chi.NewRouter()
+
+	r.Use(middleware.WithCors(cfg))
 
 	r.Route("/snippets", func(sr chi.Router) {
 		sr.With(middleware.WithIngestion()).Put(
-			"/{filename}", snippet.Create(svc, lgr))
+			"/{filename}", snippet.Create(svc, cfg, lgr))
 		sr.With(middleware.WithIngestion()).Post(
-			"/", snippet.Create(svc, lgr))
+			"/", snippet.Create(svc, cfg, lgr))
 		sr.Get("/r/{snippetID}", snippet.Get(svc, lgr, "raw"))
 		sr.Get("/{snippetID}", snippet.Get(svc, lgr, "json"))
 	})

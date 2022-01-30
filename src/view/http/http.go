@@ -35,7 +35,7 @@ func (w *webView) Shutdown(ctx context.Context) {
 }
 
 func Init(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) view.View {
-	rtr := router.New(svc, lgr)
+	rtr := router.New(svc, cfg, lgr)
 	srv := &http.Server{
 		Addr:    cfg.GetListenAddr(),
 		Handler: rtr,

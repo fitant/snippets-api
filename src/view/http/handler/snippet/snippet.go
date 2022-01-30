@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/fitant/xbin-api/config"
 	"github.com/fitant/xbin-api/src/service"
 	"github.com/fitant/xbin-api/src/view/http/contract"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
-func Create(svc service.Service, lgr *zap.Logger) http.HandlerFunc {
+func Create(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		data := req.Context().Value(contract.CS).(contract.CreateSnippet)
 
@@ -21,7 +22,7 @@ func Create(svc service.Service, lgr *zap.Logger) http.HandlerFunc {
 		}
 
 		resp := contract.CreateSnippetResponse{
-			URL: fmt.Sprintf("http://localhost:8080/snippets/%s", snippet.ID),
+			URL: fmt.Sprintf(cfg.BaseURL, snippet.ID),
 		}
 
 		raw, _ := json.Marshal(resp)

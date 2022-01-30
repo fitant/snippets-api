@@ -20,8 +20,10 @@ func Load() *Config {
 	viper.SetDefault("DB_EPH_CAPPED", true)
 	viper.SetDefault("DB_MIGRATIONS", "migrations")
 	// Web View Defaults
-	viper.SetDefault("WEB_LISTEN_PORT", 8080)
-	viper.SetDefault("WEB_LISTEN_HOST", "127.0.0.1")
+	viper.SetDefault("HTTP_LISTEN_PORT", 8080)
+	viper.SetDefault("HTTP_LISTEN_HOST", "127.0.0.1")
+	viper.SetDefault("HTTP_BASE_URL", "http://127.0.0.1:8080/snippets/r/%s")
+	viper.SetDefault("HTTP_CORS_LIST", "http://localhost:*")
 	return &Config{
 		App: app{
 			env: viper.GetString("ENV"),
@@ -42,8 +44,10 @@ func Load() *Config {
 			},
 		},
 		Http: HTTPServerConfig{
-			host: viper.GetString("WEB_LISTEN_HOST"),
-			port: viper.GetInt("WEB_LISTEN_PORT"),
+			host: viper.GetString("HTTP_LISTEN_HOST"),
+			port: viper.GetInt("HTTP_LISTEN_PORT"),
+			CORS: viper.GetString("HTTP_CORS_LIST"),
+			BaseURL: viper.GetString("HTTP_BASE_URL"),
 		},
 	}
 }
