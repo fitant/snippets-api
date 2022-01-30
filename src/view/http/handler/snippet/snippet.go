@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/fitant/xbin-api/config"
+	"github.com/fitant/xbin-api/src/db"
 	"github.com/fitant/xbin-api/src/service"
 	"github.com/fitant/xbin-api/src/view/http/contract"
 	"github.com/go-chi/chi/v5"
@@ -19,6 +20,7 @@ func Create(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) 
 		snippet, err := svc.CreateSnippet(data.Data.Snippet, data.Metadata.Language, data.Metadata.Ephemeral)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		resp := contract.CreateSnippetResponse{
@@ -36,10 +38,13 @@ func Get(svc service.Service, lgr *zap.Logger, responseType string) http.Handler
 
 		snippet, err := svc.FetchSnippet(snippetID)
 		if err != nil {
+			if err == db.ErrNoDocuments {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
-
-		fmt.Printf("%+v\n", snippet)
 
 		if responseType == "raw" {
 			w.Write([]byte(snippet.Snippet))
