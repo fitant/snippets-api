@@ -30,7 +30,7 @@ func Load() *Config {
 			ll:  viper.GetString("LOG_LEVEL"),
 		},
 		DB: DB{
-			env:            viper.GetString("ENV"),
+			env:            viper.GetString("DB_ENV"),
 			timeout:        viper.GetInt("DB_TIMEOUT"),
 			user:           viper.GetString("DB_USER"),
 			pass:           viper.GetString("DB_PASS"),
@@ -44,9 +44,9 @@ func Load() *Config {
 			},
 		},
 		Http: HTTPServerConfig{
-			host: viper.GetString("HTTP_LISTEN_HOST"),
-			port: viper.GetInt("HTTP_LISTEN_PORT"),
-			CORS: viper.GetString("HTTP_CORS_LIST"),
+			host:    viper.GetString("HTTP_LISTEN_HOST"),
+			port:    viper.GetInt("HTTP_LISTEN_PORT"),
+			CORS:    viper.GetString("HTTP_CORS_LIST"),
 			BaseURL: viper.GetString("HTTP_BASE_URL"),
 		},
 	}
