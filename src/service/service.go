@@ -36,7 +36,8 @@ func (s *serviceImpl) CreateSnippet(snippet, language string, ephemeral bool) (*
 		return s.CreateSnippet(snippet, language, ephemeral)
 	}
 
-	snip, err := s.sc.NewSnippet(id, base64.StdEncoding.EncodeToString([]byte(snippet)),
+	compressedSnippet := defalteBrotli([]byte(snippet))
+	snip, err := s.sc.NewSnippet(id, base64.StdEncoding.EncodeToString(compressedSnippet),
 		language, ephemeral)
 	if err != nil {
 		if err == db.ErrDuplicateKey {
@@ -60,7 +61,7 @@ func (s *serviceImpl) FetchSnippet(id string) (*model.Snippet, error) {
 	}
 
 	str, _ := base64.StdEncoding.DecodeString(snip.Snippet)
-	snip.Snippet = string(str)
+	snip.Snippet = string(inflateBrotli(str))
 
 	return snip, nil
 }

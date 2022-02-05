@@ -3,6 +3,7 @@ module github.com/fitant/xbin-api
 go 1.17
 
 require (
+	github.com/andybalholm/brotli v1.0.4
 	github.com/cenkalti/backoff/v4 v4.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.7 // indirect
