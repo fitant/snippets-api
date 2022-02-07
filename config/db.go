@@ -1,10 +1,11 @@
 package config
 
-import "fmt"
-
+import (
+	"fmt"
+)
 
 type DB struct {
-	env                 string
+	kind                string
 	user                string
 	pass                string
 	host                string
@@ -12,19 +13,24 @@ type DB struct {
 	migrationsPath      string
 	database            string
 	collection          string
+	rsname              string
 	timeout             int
 	ephemeralCollection ephemeralCollection
 }
 
 type ephemeralCollection struct {
-	Name    string
+	Name string
 }
 
 func (db *DB) Address() string {
-	if db.env == Environments["dev"] {
-		return fmt.Sprintf("%s://%s:%s@%s:%s/", "mongodb", db.user, db.pass, db.host, db.port)
+	switch db.kind {
+	case "dnsseed":
+		return fmt.Sprintf("mongodb+srv://%s:%s@%s/", db.user, db.pass, db.host)
+	case "replicaset":
+		return fmt.Sprintf("mongodb://%s:%s@%s/?replicaSet=%s", db.user, db.pass, db.host, db.rsname)
+	default: // Use "standalone" as default fallback
+		return fmt.Sprintf("mongodb://%s:%s@%s:%s/", db.user, db.pass, db.host, db.port)
 	}
-	return fmt.Sprintf("%s://%s:%s@%s/?retryWrites=true&w=majority", "mongodb+srv", db.user, db.pass, db.host)
 }
 
 func (db *DB) Collection() string {

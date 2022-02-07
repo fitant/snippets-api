@@ -24,13 +24,15 @@ func Load() *Config {
 	viper.SetDefault("HTTP_LISTEN_HOST", "127.0.0.1")
 	viper.SetDefault("HTTP_BASE_URL", "http://127.0.0.1:8080/snippets/r/%s")
 	viper.SetDefault("HTTP_CORS_LIST", "http://localhost:*")
+	viper.SetDefault("DB_RSNAME", "rs0")
 	return &Config{
 		App: app{
 			env: viper.GetString("ENV"),
 			ll:  viper.GetString("LOG_LEVEL"),
 		},
 		DB: DB{
-			env:            viper.GetString("DB_ENV"),
+			kind:           viper.GetString("DB_TYPE"),
+			rsname:         viper.GetString("DB_RSNAME"),
 			timeout:        viper.GetInt("DB_TIMEOUT"),
 			user:           viper.GetString("DB_USER"),
 			pass:           viper.GetString("DB_PASS"),
