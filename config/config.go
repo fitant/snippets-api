@@ -14,10 +14,10 @@ func Load() *Config {
 	viper.SetDefault("ENV", "dev")
 	viper.SetDefault("LOG_LEVEL", "debug")
 	// DB Defaults
+	viper.SetDefault("DB_NAME", "snippets-fitant")
 	viper.SetDefault("DB_ENV", "dev")
 	viper.SetDefault("DB_EPH_MAX_COUNT", 0)
 	viper.SetDefault("DB_TIMEOUT", 10)
-	viper.SetDefault("DB_EPH_CAPPED", true)
 	viper.SetDefault("DB_MIGRATIONS", "migrations")
 	// Web View Defaults
 	viper.SetDefault("HTTP_LISTEN_PORT", 8080)
@@ -37,10 +37,10 @@ func Load() *Config {
 			host:           viper.GetString("DB_HOST"),
 			port:           viper.GetString("DB_PORT"),
 			database:       viper.GetString("DB_NAME"),
-			collection:     viper.GetString("DB_COLLECTION"),
+			collection:     "snippets",
 			migrationsPath: viper.GetString("DB_MIGRATIONS"),
 			ephemeralCollection: ephemeralCollection{
-				Name: viper.GetString("DB_EPH_COLLECTION"),
+				Name: "eph_snippets",
 			},
 		},
 		Http: HTTPServerConfig{
