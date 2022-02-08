@@ -28,6 +28,7 @@ func Create(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) 
 		}
 
 		raw, _ := json.Marshal(resp)
+		req.Header.Add("Content-Type", "application/json")
 		w.Write(raw)
 	}
 }
@@ -62,6 +63,7 @@ func Get(svc service.Service, lgr *zap.Logger, responseType string) http.Handler
 		}
 
 		raw, _ := json.Marshal(resp)
+		req.Header.Add("Content-Type", "application/json")
 		w.Write(raw)
 	}
 }
