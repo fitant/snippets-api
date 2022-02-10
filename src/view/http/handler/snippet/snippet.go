@@ -24,7 +24,7 @@ func Create(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) 
 		}
 
 		resp := contract.CreateSnippetResponse{
-			URL: fmt.Sprintf(cfg.BaseURL, snippet.ID),
+			URL: fmt.Sprintf(cfg.GetBaseURL(), snippet.ID),
 		}
 
 		raw, _ := json.Marshal(resp)

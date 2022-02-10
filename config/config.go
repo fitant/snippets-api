@@ -22,7 +22,8 @@ func Load() *Config {
 	// Web View Defaults
 	viper.SetDefault("HTTP_LISTEN_PORT", 8080)
 	viper.SetDefault("HTTP_LISTEN_HOST", "127.0.0.1")
-	viper.SetDefault("HTTP_BASE_URL", "http://127.0.0.1:8080/snippets/r/%s")
+	viper.SetDefault("HTTP_BASE_URL", "r/%s")
+	viper.SetDefault("HTTP_BASE_ENDPOINT", "snippets")
 	viper.SetDefault("HTTP_CORS_LIST", "http://localhost:*")
 	viper.SetDefault("DB_RSNAME", "rs0")
 	return &Config{
@@ -46,10 +47,11 @@ func Load() *Config {
 			},
 		},
 		Http: HTTPServerConfig{
-			host:    viper.GetString("HTTP_LISTEN_HOST"),
-			port:    viper.GetInt("HTTP_LISTEN_PORT"),
-			CORS:    viper.GetString("HTTP_CORS_LIST"),
-			BaseURL: viper.GetString("HTTP_BASE_URL"),
+			host:         viper.GetString("HTTP_LISTEN_HOST"),
+			port:         viper.GetInt("HTTP_LISTEN_PORT"),
+			CORS:         viper.GetString("HTTP_CORS_LIST"),
+			baseURL:      viper.GetString("HTTP_BASE_URL"),
+			BaseEndpoint: viper.GetString("HTTP_BASE_ENDPOINT"),
 		},
 	}
 }
