@@ -1,4 +1,4 @@
-package service
+package utils
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"github.com/leonklingele/passphrase"
 )
 
-func generateID(n int) string {
+func GenerateID(n int) string {
 	passphrase.Separator = "-"
 	id, _ := passphrase.Generate(n)
 
@@ -20,7 +20,7 @@ func generateID(n int) string {
 	return strings.Join(idFields, "")
 }
 
-func defalteBrotli(data []byte) []byte {
+func DefalteBrotli(data []byte) []byte {
 	var b bytes.Buffer
 	w := brotli.NewWriterLevel(&b, brotli.BestCompression)
 	w.Write(data)
@@ -28,7 +28,7 @@ func defalteBrotli(data []byte) []byte {
 	return b.Bytes()
 }
 
-func inflateBrotli(data []byte) []byte {
+func InflateBrotli(data []byte) []byte {
 	var b bytes.Reader
 	b.Read(data)
 	r := brotli.NewReader(bytes.NewReader(data))

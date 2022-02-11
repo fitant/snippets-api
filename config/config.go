@@ -1,6 +1,9 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/fitant/xbin-api/src/types"
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	App  app
@@ -13,6 +16,7 @@ func Load() *Config {
 	// App Defaults
 	viper.SetDefault("ENV", "dev")
 	viper.SetDefault("LOG_LEVEL", "debug")
+	viper.SetDefault("CIPHER", "AES")
 	// DB Defaults
 	viper.SetDefault("DB_NAME", "snippets-fitant")
 	viper.SetDefault("DB_ENV", "dev")
@@ -26,10 +30,12 @@ func Load() *Config {
 	viper.SetDefault("HTTP_BASE_ENDPOINT", "snippets")
 	viper.SetDefault("HTTP_CORS_LIST", "http://localhost:*")
 	viper.SetDefault("DB_RSNAME", "rs0")
-	return &Config{
+	cfg := &Config{
 		App: app{
-			env: viper.GetString("ENV"),
-			ll:  viper.GetString("LOG_LEVEL"),
+			env:    viper.GetString("ENV"),
+			ll:     viper.GetString("LOG_LEVEL"),
+			Salt:   viper.GetString("SALT"),
+			cipher: viper.GetString("CIPHER"),
 		},
 		DB: DB{
 			kind:           viper.GetString("DB_TYPE"),
@@ -54,4 +60,17 @@ func Load() *Config {
 			BaseEndpoint: viper.GetString("HTTP_BASE_ENDPOINT"),
 		},
 	}
+
+	switch cfg.App.cipher {
+	case "SEAT":
+		if viper.GetBool("CIPHER_UNTESTED") {
+			cfg.App.Cipher = types.SeaTurtle
+			break
+		}
+		fallthrough
+	default:
+		cfg.App.Cipher = types.AES
+	}
+
+	return cfg
 }

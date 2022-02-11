@@ -6,6 +6,8 @@ import (
 
 	"github.com/fitant/xbin-api/src/db"
 	"github.com/fitant/xbin-api/src/model"
+	"github.com/fitant/xbin-api/src/types"
+	"github.com/fitant/xbin-api/src/utils"
 	"go.uber.org/zap"
 )
 
@@ -16,28 +18,34 @@ type Service interface {
 
 type serviceImpl struct {
 	uidSize int
+	salt    []byte
 	sc      model.SnippetController
+	cipher  types.CipherSelection
 	lgr     *zap.Logger
 }
 
-func NewSnippetService(sc model.SnippetController, lgr *zap.Logger) Service {
+func NewSnippetService(sc model.SnippetController, salt []byte, cipher types.CipherSelection, lgr *zap.Logger) Service {
+	if len(salt) == 0 {
+		panic("salt not specified")
+	}
 	return &serviceImpl{
 		lgr:     lgr,
 		sc:      sc,
+		cipher:  cipher,
 		uidSize: 2,
+		salt:    salt,
 	}
 }
 
 func (s *serviceImpl) CreateSnippet(snippet, language string, ephemeral bool) (*model.Snippet, error) {
-	id := generateID(s.uidSize)
-	_, err := s.FetchSnippet(id)
-	if err != db.ErrNoDocuments {
-		s.uidSize++
-		return s.CreateSnippet(snippet, language, ephemeral)
-	}
+	id := utils.GenerateID(s.uidSize)
+	hashedID := utils.HashID([]byte(id), s.salt)
+	encodedID := base64.StdEncoding.EncodeToString(hashedID)
 
-	compressedSnippet := defalteBrotli([]byte(snippet))
-	snip, err := s.sc.NewSnippet(id, base64.StdEncoding.EncodeToString(compressedSnippet),
+	// Deflate snippet -> Encrypt snippet -> encode snippet
+	compressedSnippet := utils.DefalteBrotli([]byte(snippet))
+	encryptedSnippet := utils.Encrypt(compressedSnippet, []byte(id), s.cipher)
+	snip, err := s.sc.NewSnippet(encodedID, base64.StdEncoding.EncodeToString(encryptedSnippet),
 		language, ephemeral)
 	if err != nil {
 		if err == db.ErrDuplicateKey {
@@ -48,11 +56,16 @@ func (s *serviceImpl) CreateSnippet(snippet, language string, ephemeral bool) (*
 		return nil, err
 	}
 
+	// Return generated ID instead of the stored hashed ID
+	snip.ID = id
+
 	return snip, nil
 }
 
 func (s *serviceImpl) FetchSnippet(id string) (*model.Snippet, error) {
-	snip, err := s.sc.FindSnippet(id)
+	hashedID := utils.HashID([]byte(id), s.salt)
+	encodedID := base64.StdEncoding.EncodeToString(hashedID)
+	snip, err := s.sc.FindSnippet(encodedID)
 	if err != nil {
 		if err != db.ErrNoDocuments {
 			s.lgr.Error(fmt.Sprintf("%s : %v", "[Service] [FetchSnippet] [FindSnippet]", err))
@@ -60,8 +73,13 @@ func (s *serviceImpl) FetchSnippet(id string) (*model.Snippet, error) {
 		return nil, err
 	}
 
-	str, _ := base64.StdEncoding.DecodeString(snip.Snippet)
-	snip.Snippet = string(inflateBrotli(str))
+	// Decode snippet -> Decrypt snippet -> inflate snippet
+	encryptedSnippet, _ := base64.StdEncoding.DecodeString(snip.Snippet)
+	decryptedSnippet := utils.Decrypt(encryptedSnippet, []byte(id), s.cipher)
+	snip.Snippet = string(utils.InflateBrotli(decryptedSnippet))
+
+	// Return generated ID instead of the stored hashed ID
+	snip.ID = id
 
 	return snip, nil
 }
