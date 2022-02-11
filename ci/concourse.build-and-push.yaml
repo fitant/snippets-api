@@ -1,0 +1,45 @@
+resources:
+  - name: snippets-source
+    type: git
+    source:
+      uri: git@github.com:fitant/snippets-api.git
+      branch: main
+      private_key: ((repo_privkey))
+  - name: snippets-image
+    type: registry-image
+    icon: docker
+    source:
+      repository: ((registry_url))/((image_repo))/snippets-api
+      username: ((registry_username))
+      password: ((registry_password))
+
+jobs:
+  - name: build-and-push
+    plan:
+      - get: snippets-source
+        trigger: true
+      - task: build-task-image
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: concourse/oci-build-task
+              tag: master
+          inputs:
+            - name: snippets-source
+          outputs:
+            - name: image
+            - name: snippets-source
+          params:
+            CONTEXT: snippets-source
+          run:
+            path: sh
+            args:
+              - -c
+              - build; cd snippets-source; git rev-parse --short HEAD > tag;
+      - put: snippets-image
+        params:
+          image: image/image.tar
+          additional_tags: snippets-source/tag
