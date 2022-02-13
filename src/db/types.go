@@ -5,7 +5,8 @@ type FindSnippetQuery struct {
 }
 
 type InsertSnippetQuery struct {
-	ID       string `bson:"_id"`
-	Snippet  string `bson:"snippet"`
-	Language string `bson:"language"`
+	ID        string `bson:"_id"`
+	Snippet   string `bson:"snippet"`
+	Language  string `bson:"language"`
+	CreatedAt int64  `bson:"created_at"`
 }

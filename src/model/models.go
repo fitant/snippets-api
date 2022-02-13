@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fitant/xbin-api/src/db"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,9 +35,10 @@ func NewMongoSnippetController(db *db.MongoFindInsert, lgr *zap.Logger) SnippetC
 
 func (msc *mongoSnippetController) NewSnippet(id, snip, language string, ephemeral bool) (*Snippet, error) {
 	data := db.InsertSnippetQuery{
-		ID:       id,
-		Snippet:  snip,
-		Language: language,
+		ID:        id,
+		Snippet:   snip,
+		Language:  language,
+		CreatedAt: time.Now().Unix(),
 	}
 
 	doc, err := db.StructToBSON(data, msc.lgr)

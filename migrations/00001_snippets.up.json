@@ -1,18 +1,25 @@
 [
     {
         "create": "snippets",
+        "capped": true,
+        "size": 1073741824,
         "validator": {
             "$jsonSchema": {
                 "bsonType": "object",
                 "required": [
                     "_id",
                     "snippet",
-                    "language"
+                    "language",
+                    "created_at"
                 ],
                 "properties": {
                     "_id": {
                         "bsonType": "string",
                         "description": "ID of snippet"
+                    },
+                    "created_at": {
+                        "bsonType": "long",
+                        "description": "snippet creation timestamp"
                     },
                     "snippet": {
                         "bsonType": "string",

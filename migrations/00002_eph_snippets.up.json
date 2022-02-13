@@ -2,19 +2,24 @@
     {
         "create": "eph_snippets",
         "capped": true,
-        "size": 100000000,
+        "size": 536870912,
         "validator": {
             "$jsonSchema": {
                 "bsonType": "object",
                 "required": [
                     "_id",
                     "snippet",
-                    "language"
+                    "language",
+                    "created_at"
                 ],
                 "properties": {
                     "_id": {
                         "bsonType": "string",
                         "description": "ID of snippet"
+                    },
+                    "created_at": {
+                        "bsonType": "long",
+                        "description": "snippet creation timestamp"
                     },
                     "snippet": {
                         "bsonType": "string",
