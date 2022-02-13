@@ -1,2 +1,2 @@
 *.env
-ci/concourse.values.yaml
+ci/concourse.values*.yaml

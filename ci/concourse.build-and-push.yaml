@@ -10,6 +10,7 @@ resources:
     icon: docker
     source:
       repository: ((registry_url))/((image_repo))/snippets-api
+      tag: latest
       username: ((registry_username))
       password: ((registry_password))
 
@@ -18,7 +19,7 @@ jobs:
     plan:
       - get: snippets-source
         trigger: true
-      - task: build-task-image
+      - task: build-image
         privileged: true
         config:
           platform: linux
@@ -31,15 +32,27 @@ jobs:
             - name: snippets-source
           outputs:
             - name: image
-            - name: snippets-source
           params:
             CONTEXT: snippets-source
+          run:
+            path: build
+      - task: tag-image
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: alpine/git
+          inputs:
+            - name: snippets-source
+          outputs:
+            - name: tags
           run:
             path: sh
             args:
               - -c
-              - build; cd snippets-source; git rev-parse --short HEAD > tag;
+              - cd snippets-source; git rev-parse --short HEAD > ../tags/tags
       - put: snippets-image
         params:
           image: image/image.tar
-          additional_tags: snippets-source/tag
+          additional_tags: tags/tags
