@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/fitant/xbin-api/config"
 	"github.com/fitant/xbin-api/src/db"
 	"github.com/fitant/xbin-api/src/model"
 	"github.com/fitant/xbin-api/src/types"
@@ -17,23 +18,25 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	uidSize int
-	salt    []byte
-	sc      model.SnippetController
-	cipher  types.CipherSelection
-	lgr     *zap.Logger
+	uidSize   int
+	salt      []byte
+	sc        model.SnippetController
+	cipher    types.CipherSelection
+	lgr       *zap.Logger
+	overrides map[string]string
 }
 
-func NewSnippetService(sc model.SnippetController, salt []byte, cipher types.CipherSelection, lgr *zap.Logger) Service {
-	if len(salt) == 0 {
+func NewSnippetService(sc model.SnippetController, cfg config.Service, lgr *zap.Logger) Service {
+	if len(cfg.Salt) == 0 {
 		panic("salt not specified")
 	}
 	return &serviceImpl{
-		lgr:     lgr,
-		sc:      sc,
-		cipher:  cipher,
-		uidSize: 2,
-		salt:    salt,
+		lgr:       lgr,
+		sc:        sc,
+		cipher:    cfg.Cipher,
+		uidSize:   2,
+		salt:      []byte(cfg.Salt),
+		overrides: cfg.Overrides,
 	}
 }
 
@@ -63,6 +66,9 @@ func (s *serviceImpl) CreateSnippet(snippet, language string, ephemeral bool) (*
 }
 
 func (s *serviceImpl) FetchSnippet(id string) (*model.Snippet, error) {
+	if s.overrides[id] != "" {
+		id = s.overrides[id]
+	}
 	hashedID := utils.HashID([]byte(id), s.salt)
 	encodedID := base64.StdEncoding.EncodeToString(hashedID)
 	snip, err := s.sc.FindSnippet(encodedID)

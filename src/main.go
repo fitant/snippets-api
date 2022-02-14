@@ -26,7 +26,7 @@ func main() {
 	}
 
 	sc := model.NewMongoSnippetController(dbInstance, lgr)
-	svc := service.NewSnippetService(sc, []byte(cfg.App.Salt), cfg.App.Cipher, lgr)
+	svc := service.NewSnippetService(sc, cfg.Svc, lgr)
 
 	// Initialise and start serving webview
 	httpView := http.Init(svc, &cfg.Http, lgr)

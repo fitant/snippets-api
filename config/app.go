@@ -1,13 +1,7 @@
 package config
 
-import "github.com/fitant/xbin-api/src/types"
-
-
 type app struct {
 	env string
-	Salt string
-	Cipher types.CipherSelection
-	cipher string
 	ll  string
 }
 

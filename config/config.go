@@ -1,12 +1,15 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/fitant/xbin-api/src/types"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	App  app
+	Svc  Service
 	DB   DB
 	Http HTTPServerConfig
 }
@@ -32,10 +35,12 @@ func Load() *Config {
 	viper.SetDefault("DB_RSNAME", "rs0")
 	cfg := &Config{
 		App: app{
-			env:    viper.GetString("ENV"),
-			ll:     viper.GetString("LOG_LEVEL"),
-			Salt:   viper.GetString("SALT"),
-			cipher: viper.GetString("CIPHER"),
+			env: viper.GetString("ENV"),
+			ll:  viper.GetString("LOG_LEVEL"),
+		},
+		Svc: Service{
+			Salt:      []byte(viper.GetString("SALT")),
+			Overrides: make(map[string]string),
 		},
 		DB: DB{
 			kind:           viper.GetString("DB_TYPE"),
@@ -61,16 +66,25 @@ func Load() *Config {
 		},
 	}
 
-	switch cfg.App.cipher {
+	switch viper.GetString("CIPHER") {
 	case "SEAT":
 		if viper.GetBool("CIPHER_UNTESTED") {
-			cfg.App.Cipher = types.SeaTurtle
+			cfg.Svc.Cipher = types.SeaTurtle
 			break
 		}
 		fallthrough
 	default:
-		cfg.App.Cipher = types.AES
+		cfg.Svc.Cipher = types.AES
 	}
+
+	overrides := viper.GetString("OVERRIDES")
+	for _, override := range strings.Split(overrides, ",") {
+		entry := strings.Split(override, ":")
+		if len(entry) == 2 {
+			cfg.Svc.Overrides[entry[0]] = entry[1]
+		}
+	}
+
 
 	return cfg
 }
