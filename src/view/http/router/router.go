@@ -14,7 +14,7 @@ func New(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) *ch
 
 	r.Use(middleware.WithCors(cfg))
 
-	r.Route(cfg.BaseEndpoint, func(sr chi.Router) {
+	r.Route(cfg.Enpoint, func(sr chi.Router) {
 		sr.With(middleware.WithIngestion()).Put(
 			"/{filename}", snippet.Create(svc, cfg, lgr))
 		sr.With(middleware.WithIngestion()).Post(

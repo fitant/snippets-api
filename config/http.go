@@ -7,13 +7,18 @@ type HTTPServerConfig struct {
 	port         int
 	CORS         string
 	baseURL      string
-	BaseEndpoint string
+	Enpoint      string
+	returnFormat string
 }
 
-func (h HTTPServerConfig) GetListenAddr() string {
+func (h *HTTPServerConfig) GetListenAddr() string {
 	return fmt.Sprintf("%s:%d", h.host, h.port)
 }
 
-func (h HTTPServerConfig) GetBaseURL() string {
-	return fmt.Sprintf("http://%s:%d%s/%s", h.host, h.port, h.BaseEndpoint, h.baseURL)
+func (h *HTTPServerConfig) GetBaseURL() string {
+	switch h.returnFormat {
+	case "formatted":
+		return fmt.Sprintf("%s%s/%%s", h.baseURL, h.Enpoint)
+	}
+	return fmt.Sprintf("%s%s/r/%%s", h.baseURL, h.Enpoint)
 }

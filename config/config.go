@@ -23,14 +23,16 @@ func Load() *Config {
 	// DB Defaults
 	viper.SetDefault("DB_NAME", "snippets-fitant")
 	viper.SetDefault("DB_ENV", "dev")
+	viper.SetDefault("DB_PORT", "27017")
 	viper.SetDefault("DB_EPH_MAX_COUNT", 0)
 	viper.SetDefault("DB_TIMEOUT", 10)
 	viper.SetDefault("DB_MIGRATIONS", "migrations")
 	// Web View Defaults
 	viper.SetDefault("HTTP_LISTEN_PORT", 8080)
 	viper.SetDefault("HTTP_LISTEN_HOST", "127.0.0.1")
-	viper.SetDefault("HTTP_BASE_URL", "r/%s")
-	viper.SetDefault("HTTP_BASE_ENDPOINT", "snippets")
+	viper.SetDefault("HTTP_BASE_URL", "http://localhost:8080")
+	viper.SetDefault("HTTP_RETURN_FORMAT", "raw")
+	viper.SetDefault("HTTP_API_ENDPOINT", "/snippets")
 	viper.SetDefault("HTTP_CORS_LIST", "http://localhost:*")
 	viper.SetDefault("DB_RSNAME", "rs0")
 	cfg := &Config{
@@ -62,7 +64,8 @@ func Load() *Config {
 			port:         viper.GetInt("HTTP_LISTEN_PORT"),
 			CORS:         viper.GetString("HTTP_CORS_LIST"),
 			baseURL:      viper.GetString("HTTP_BASE_URL"),
-			BaseEndpoint: viper.GetString("HTTP_BASE_ENDPOINT"),
+			Enpoint:      viper.GetString("HTTP_API_ENDPOINT"),
+			returnFormat: viper.GetString("HTTP_RETURN_FORMAT"),
 		},
 	}
 
@@ -84,7 +87,6 @@ func Load() *Config {
 			cfg.Svc.Overrides[entry[0]] = entry[1]
 		}
 	}
-
 
 	return cfg
 }
