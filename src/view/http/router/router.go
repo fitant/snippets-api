@@ -16,7 +16,7 @@ func New(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) *ch
 
 	r.Route(cfg.Enpoint, func(sr chi.Router) {
 		sr.With(middleware.WithIngestion()).Put(
-			"/{filename}", snippet.Create(svc, cfg, lgr))
+			"/", snippet.Create(svc, cfg, lgr))
 		sr.With(middleware.WithIngestion()).Post(
 			"/", snippet.Create(svc, cfg, lgr))
 		sr.Get("/r/{snippetID}", snippet.Get(svc, lgr, "raw"))
