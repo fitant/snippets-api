@@ -17,7 +17,7 @@ func (h *HTTPServerConfig) GetListenAddr() string {
 
 func (h *HTTPServerConfig) GetBaseURL() string {
 	switch h.returnFormat {
-	case "formatted":
+	case "json":
 		return fmt.Sprintf("%s%s/%%s", h.baseURL, h.Enpoint)
 	}
 	return fmt.Sprintf("%s%s/r/%%s", h.baseURL, h.Enpoint)
