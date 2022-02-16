@@ -65,10 +65,13 @@ Configuration is done through environment variables
 
 #### General Config:
 
-| Name      | Type / Options              | Description                      | Required | Default |
-|-----------|-----------------------------|----------------------------------|----------|---------|
-| ENV       | string                      | Application Environment          | no       | dev     |
-| LOG_LEVEL | debug / info / warn / error | Log Level to print               | no       | debug   |
+| Name      | Type / Options                     | Description                         | Required | Default |
+|-----------|------------------------------------|-------------------------------------|----------|---------|
+| ENV       | string                             | Application Environment             | no       | dev     |
+| LOG_LEVEL | debug / info / warn / error        | Log Level to print                  | no       | debug   |
+| OVERRIDES | comma and colon seperated mappings | override certain IDs for About, etc | no       |         |
+
+***Example Overrides:*** About:BackwashLicorice,PrivacyPolicy:TranceUnsterile
 
 #### Cryptography Config:
 
