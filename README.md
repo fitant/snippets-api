@@ -10,13 +10,15 @@ Or, if you prefer, use the API directly: https://snippets.fitant.cloud/api
 > curl -F "snippet=@hello-world.txt" https://snippets.fitant.cloud/api
 {"URL":"https://snippets.fitant.cloud/api/r/MorallyStimulate"}
 
+> curl https://snippets.fitant.cloud/api/r/MorallyStimulate
+Hello, World!
+
+> # Or, just use curl --upload-file
+
 > curl --upload-file hello-world.txt https://snippets.fitant.cloud/api 
 {"URL":"https://snippets.fitant.cloud/api/r/EmbossChemicals"}
 
 > curl https://snippets.fitant.cloud/api/r/EmbossChemicals
-Hello, World!
-
-> curl https://snippets.fitant.cloud/api/r/MorallyStimulate
 Hello, World!
 
 > echo "Snippets is Awesome!"
