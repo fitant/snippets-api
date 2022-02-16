@@ -22,7 +22,6 @@ func Load() *Config {
 	viper.SetDefault("CIPHER", "AES")
 	// DB Defaults
 	viper.SetDefault("DB_NAME", "snippets-fitant")
-	viper.SetDefault("DB_ENV", "dev")
 	viper.SetDefault("DB_PORT", "27017")
 	viper.SetDefault("DB_EPH_MAX_COUNT", 0)
 	viper.SetDefault("DB_TIMEOUT", 10)
