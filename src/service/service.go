@@ -9,7 +9,6 @@ import (
 	"github.com/fitant/xbin-api/src/model"
 	"github.com/fitant/xbin-api/src/types"
 	"github.com/fitant/xbin-api/src/utils"
-	"go.uber.org/zap"
 )
 
 type Service interface {
@@ -22,16 +21,14 @@ type serviceImpl struct {
 	salt      []byte
 	sc        model.SnippetController
 	cipher    types.CipherSelection
-	lgr       *zap.Logger
 	overrides map[string]string
 }
 
-func NewSnippetService(sc model.SnippetController, cfg config.Service, lgr *zap.Logger) Service {
+func NewSnippetService(sc model.SnippetController, cfg config.Service) Service {
 	if len(cfg.Salt) == 0 {
 		panic("salt not specified")
 	}
 	return &serviceImpl{
-		lgr:       lgr,
 		sc:        sc,
 		cipher:    cfg.Cipher,
 		uidSize:   2,
@@ -55,7 +52,7 @@ func (s *serviceImpl) CreateSnippet(snippet, language string, ephemeral bool) (*
 			s.uidSize++
 			return s.CreateSnippet(snippet, language, ephemeral)
 		}
-		s.lgr.Error(fmt.Sprintf("%s : %v", "[Service] [CreateSnippet] [NewSnippet]", err))
+		utils.Logger.Error(fmt.Sprintf("%s : %v", "[Service] [CreateSnippet] [NewSnippet]", err))
 		return nil, err
 	}
 
@@ -74,7 +71,7 @@ func (s *serviceImpl) FetchSnippet(id string) (*model.Snippet, error) {
 	snip, err := s.sc.FindSnippet(encodedID)
 	if err != nil {
 		if err != db.ErrNoDocuments {
-			s.lgr.Error(fmt.Sprintf("%s : %v", "[Service] [FetchSnippet] [FindSnippet]", err))
+			utils.Logger.Error(fmt.Sprintf("%s : %v", "[Service] [FetchSnippet] [FindSnippet]", err))
 		}
 		return nil, err
 	}

@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var Logger *zap.Logger
 
 var logLevels map[string]zapcore.Level = map[string]zapcore.Level{
 	"debug": zap.DebugLevel,
@@ -14,7 +15,7 @@ var logLevels map[string]zapcore.Level = map[string]zapcore.Level{
 	"error": zap.ErrorLevel,
 }
 
-func InitLogger(cfg *config.Config) *zap.Logger {
+func InitLogger(cfg *config.Config) {
 	lgrCfg := zap.NewProductionConfig()
 	if cfg.App.GetEnv() == config.Environments["dev"] {
 		lgrCfg.Development = true
@@ -25,5 +26,5 @@ func InitLogger(cfg *config.Config) *zap.Logger {
 	if err != nil {
 		panic(err)
 	}
-	return lgr
+	Logger = lgr
 }

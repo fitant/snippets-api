@@ -3,15 +3,15 @@ package db
 import (
 	"fmt"
 
+	"github.com/fitant/xbin-api/src/utils"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.uber.org/zap"
 )
 
 
-func StructToBSON(obj interface{}, logger *zap.Logger) ([]byte, error) {
+func StructToBSON(obj interface{}) ([]byte, error) {
 	data, err := bson.Marshal(obj)
 	if err != nil {
-		logger.Error(fmt.Sprintf("%s : %v", "[DB] [Utils] [StructToBSON]", err))
+		utils.Logger.Error(fmt.Sprintf("%s : %v", "[DB] [Utils] [StructToBSON]", err))
 		return nil, err
 	}
 

@@ -7,24 +7,23 @@ import (
 	"time"
 
 	"github.com/fitant/xbin-api/src/db/internal/migrations"
+	"github.com/fitant/xbin-api/src/utils"
 
 	"github.com/fitant/xbin-api/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.uber.org/zap"
 )
 
 type MongoFindInsert struct {
 	ephSnips *mongo.Collection
 	snips    *mongo.Collection
-	lgr      *zap.Logger
 	timeout  time.Duration
 }
 
 var ErrNoDocuments error = mongo.ErrNoDocuments
 var ErrDuplicateKey error = errors.New("error: duplicate key insertion")
 
-func NewMongoStore(cfg *config.Config, lgr *zap.Logger) (*MongoFindInsert, error) {
+func NewMongoStore(cfg *config.Config) (*MongoFindInsert, error) {
 	timeout := time.Duration(cfg.DB.TimeoutInSec() * int(time.Second))
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -46,7 +45,6 @@ func NewMongoStore(cfg *config.Config, lgr *zap.Logger) (*MongoFindInsert, error
 	return &MongoFindInsert{
 		snips:    db.Collection(cfg.DB.Collection()),
 		ephSnips: db.Collection(cfg.DB.EphemeralCollection().Name),
-		lgr:      lgr,
 		timeout:  timeout,
 	}, nil
 }
@@ -62,7 +60,7 @@ func (db *MongoFindInsert) FindOne(condition []byte, eph bool) (*mongo.SingleRes
 
 	res := collection.FindOne(ctx, condition)
 	if res.Err() != nil && res.Err() != mongo.ErrNoDocuments {
-		db.lgr.Error(fmt.Sprintf("%s : %s", "[DB] [FindOne]", res.Err()))
+		utils.Logger.Error(fmt.Sprintf("%s : %s", "[DB] [FindOne]", res.Err()))
 		return nil, res.Err()
 	}
 
@@ -87,7 +85,7 @@ func (db *MongoFindInsert) InsertOne(document []byte, eph bool) (*mongo.InsertOn
 		if mongo.IsDuplicateKeyError(err) {
 			return nil, ErrDuplicateKey
 		}
-		db.lgr.Error(fmt.Sprintf("%s : %v", "[DB] [InsertOne]", err))
+		utils.Logger.Error(fmt.Sprintf("%s : %v", "[DB] [InsertOne]", err))
 		return nil, err
 	}
 

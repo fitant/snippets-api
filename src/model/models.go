@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/fitant/xbin-api/src/db"
+	"github.com/fitant/xbin-api/src/utils"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.uber.org/zap"
 )
 
 type SnippetController interface {
@@ -23,13 +23,11 @@ type Snippet struct {
 
 type mongoSnippetController struct {
 	db  *db.MongoFindInsert
-	lgr *zap.Logger
 }
 
-func NewMongoSnippetController(db *db.MongoFindInsert, lgr *zap.Logger) SnippetController {
+func NewMongoSnippetController(db *db.MongoFindInsert) SnippetController {
 	return &mongoSnippetController{
 		db:  db,
-		lgr: lgr,
 	}
 }
 
@@ -41,9 +39,9 @@ func (msc *mongoSnippetController) NewSnippet(id, snip, language string, ephemer
 		CreatedAt: time.Now().Unix(),
 	}
 
-	doc, err := db.StructToBSON(data, msc.lgr)
+	doc, err := db.StructToBSON(data)
 	if err != nil {
-		msc.lgr.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [NewSnippet] [toBSON]", err))
+		utils.Logger.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [NewSnippet] [toBSON]", err))
 		return nil, err
 	}
 
@@ -52,7 +50,7 @@ func (msc *mongoSnippetController) NewSnippet(id, snip, language string, ephemer
 		if err == db.ErrDuplicateKey {
 			return nil, err
 		}
-		msc.lgr.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [NewSnippet] [toBSON]", err))
+		utils.Logger.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [NewSnippet] [toBSON]", err))
 		return nil, err
 	}
 
@@ -70,16 +68,16 @@ func (msc *mongoSnippetController) FindSnippet(id string) (*Snippet, error) {
 		ID: id,
 	}
 
-	query, err := db.StructToBSON(rawQuery, msc.lgr)
+	query, err := db.StructToBSON(rawQuery)
 	if err != nil {
-		msc.lgr.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [toBSON]", err))
+		utils.Logger.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [toBSON]", err))
 		return nil, err
 	}
 
 	ephemeral := false
 	res, err := msc.db.FindOne(query, ephemeral)
 	if err != nil && err != db.ErrNoDocuments {
-		msc.lgr.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [static] [toBSON]", err))
+		utils.Logger.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [static] [toBSON]", err))
 		return nil, err
 	}
 
@@ -90,7 +88,7 @@ func (msc *mongoSnippetController) FindSnippet(id string) (*Snippet, error) {
 			if err == db.ErrNoDocuments {
 				return nil, err
 			}
-			msc.lgr.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [ephemeral] [toBSON]", err))
+			utils.Logger.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [ephemeral] [toBSON]", err))
 			return nil, err
 		}
 	}
@@ -101,7 +99,7 @@ func (msc *mongoSnippetController) FindSnippet(id string) (*Snippet, error) {
 
 	raw, err := res.DecodeBytes()
 	if err != nil {
-		msc.lgr.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [DecodeBytes]", err))
+		utils.Logger.Debug(fmt.Sprintf("%s : %v", "[Models] [MongoSnippetController] [FindSnippet] [DecodeBytes]", err))
 		return nil, err
 	}
 	var snippet Snippet

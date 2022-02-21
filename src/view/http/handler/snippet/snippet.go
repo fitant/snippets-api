@@ -10,10 +10,9 @@ import (
 	"github.com/fitant/xbin-api/src/service"
 	"github.com/fitant/xbin-api/src/view/http/contract"
 	"github.com/go-chi/chi/v5"
-	"go.uber.org/zap"
 )
 
-func Create(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) http.HandlerFunc {
+func Create(svc service.Service, cfg *config.HTTPServerConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		data := req.Context().Value(contract.CS).(contract.CreateSnippet)
 
@@ -33,7 +32,7 @@ func Create(svc service.Service, cfg *config.HTTPServerConfig, lgr *zap.Logger) 
 	}
 }
 
-func Get(svc service.Service, lgr *zap.Logger, responseType string) http.HandlerFunc {
+func Get(svc service.Service, responseType string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		snippetID := chi.URLParam(req, "snippetID")
 
