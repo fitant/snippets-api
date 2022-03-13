@@ -84,13 +84,15 @@ Configuration is done through environment variables
 
 ***Example Overrides:*** About:BackwashLicorice,PrivacyPolicy:TranceUnsterile
 
-#### Cryptography Config:
+#### Cryptographic Config:
 
 | Name            | Type / Options | Description                         | Required      | Default |
 |-----------------|----------------|-------------------------------------|---------------|---------|
 | SALT            | string         | SALT used for ARGON2 Key Derivation | yes           |         |
 | CIPHER          | AES / SEAT     | Block Cipher used for encryption    | no            | AES     |
-| CIPHER_UNTESTED | boolean        | Enable Untested Ciphers             | if using SEAT | false   |
+| CIPHER_UNTESTED | boolean        | Enable Untested Ciphers             | If using SEAT | false   |
+| ARGON2_MEM      | number         | ARGON2 Memory / space param in MB   | no            | 32      |
+| ARGON2_ROUNDS   | number         | ARGON2 rounds / iterations param    | no            | 8       |
 
 #### Database Config:
 

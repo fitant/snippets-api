@@ -16,19 +16,19 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
-	utils.InitLogger(cfg)
+	config.Load()
+	utils.InitLogger(config.Cfg)
 
-	dbInstance, err := db.NewMongoStore(cfg)
+	dbInstance, err := db.NewMongoStore(config.Cfg)
 	if err != nil {
 		panic(err)
 	}
 
 	sc := model.NewMongoSnippetController(dbInstance)
-	svc := service.NewSnippetService(sc, cfg.Svc)
+	svc := service.NewSnippetService(sc, config.Cfg.Svc)
 
 	// Initialise and start serving webview
-	httpView := http.Init(svc, &cfg.Http)
+	httpView := http.Init(svc, &config.Cfg.Http)
 	httpView.Serve()
 
 	gracefulShutdown([]view.View{httpView})
