@@ -12,7 +12,7 @@ import (
 
 func Migrate(db *mongo.Client, cfg *config.Config) {
 	migInstance, err := mongoMigrate.WithInstance(db, &mongoMigrate.Config{
-		DatabaseName:         cfg.DB.Database(),
+		DatabaseName: cfg.DB.Database(),
 	})
 	if err != nil {
 		panic(fmt.Sprintf("%s : %v", "[DB] [Migrate] [WithInstance]", err))

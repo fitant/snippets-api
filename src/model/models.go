@@ -22,12 +22,12 @@ type Snippet struct {
 }
 
 type mongoSnippetController struct {
-	db  *db.MongoFindInsert
+	db *db.MongoFindInsert
 }
 
 func NewMongoSnippetController(db *db.MongoFindInsert) SnippetController {
 	return &mongoSnippetController{
-		db:  db,
+		db: db,
 	}
 }
 

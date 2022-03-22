@@ -2,7 +2,7 @@ package contract
 
 type CreateSnippet struct {
 	Metadata Metadata `json:"metadata"`
-	Data  Data `json:"data"`
+	Data     Data     `json:"data"`
 }
 
 type CreateSnippetResponse struct {
@@ -10,11 +10,11 @@ type CreateSnippetResponse struct {
 }
 
 type Data struct {
-	Snippet  string `json:"snippet"`
+	Snippet string `json:"snippet"`
 }
 
 type Metadata struct {
-	Ephemeral bool `json:"ephemeral"`
+	Ephemeral bool   `json:"ephemeral"`
 	Language  string `json:"language"`
 }
 
