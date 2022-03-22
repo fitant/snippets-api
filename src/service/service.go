@@ -7,6 +7,7 @@ import (
 	"github.com/fitant/xbin-api/config"
 	"github.com/fitant/xbin-api/src/db"
 	"github.com/fitant/xbin-api/src/model"
+	"github.com/fitant/xbin-api/src/types"
 	"github.com/fitant/xbin-api/src/utils"
 )
 
@@ -16,40 +17,34 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	uidSize   int
 	sc        model.SnippetController
 	overrides map[string]string
 }
 
 func NewSnippetService(sc model.SnippetController, cfg config.Service) Service {
+	encryptionKeys = make(chan types.EncryptionStack, 10)
+	go populateEncryptionStack(2)
 	return &serviceImpl{
 		sc:        sc,
-		uidSize:   2,
 		overrides: cfg.Overrides,
 	}
 }
 
 func (s *serviceImpl) CreateSnippet(snippet, language string, ephemeral bool) (*model.Snippet, error) {
-	id := utils.GenerateID(s.uidSize)
-	hashedID := utils.HashID([]byte(id))
-	encodedID := base64.StdEncoding.EncodeToString(hashedID)
+	keys := <-encryptionKeys
 
 	// Deflate snippet -> Encrypt snippet -> encode snippet
 	compressedSnippet := utils.DefalteBrotli([]byte(snippet))
-	encryptedSnippet := utils.Encrypt(compressedSnippet, []byte(id))
-	snip, err := s.sc.NewSnippet(encodedID, base64.StdEncoding.EncodeToString(encryptedSnippet),
+	encryptedSnippet := utils.Encrypt(compressedSnippet, keys.Key, keys.Salt)
+	snip, err := s.sc.NewSnippet(keys.Hash, base64.StdEncoding.EncodeToString(encryptedSnippet),
 		language, ephemeral)
 	if err != nil {
-		if err == db.ErrDuplicateKey {
-			s.uidSize++
-			return s.CreateSnippet(snippet, language, ephemeral)
-		}
 		utils.Logger.Error(fmt.Sprintf("%s : %v", "[Service] [CreateSnippet] [NewSnippet]", err))
 		return nil, err
 	}
 
 	// Return generated ID instead of the stored hashed ID
-	snip.ID = id
+	snip.ID = keys.ID
 
 	return snip, nil
 }

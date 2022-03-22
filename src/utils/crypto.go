@@ -21,6 +21,16 @@ func HashID(id []byte) []byte {
 	return gid
 }
 
+func GenSalt() *[32]byte {
+	salt := new([32]byte)
+	io.ReadFull(rand.Reader, salt[:])
+	return salt
+}
+
+func GenKey(key, salt []byte) []byte {
+	return argon2.IDKey(key, salt, config.Cfg.Crypto.ARGON2Rounds, config.Cfg.Crypto.ARGON2Mem*1024, uint8(runtime.NumCPU()), hashLength)
+}
+
 func getCipher(selection types.CipherSelection, key []byte) cipher.Block {
 	var c cipher.Block
 	switch selection {
@@ -32,15 +42,7 @@ func getCipher(selection types.CipherSelection, key []byte) cipher.Block {
 	return c
 }
 
-func Encrypt(data []byte, key []byte) []byte {
-	salt := make([]byte, hashLength)
-	// Read random values from crypto/rand for key salt
-	// Error can be safely ignored
-	io.ReadFull(rand.Reader, salt)
-
-	// Derive Key for encryption from ID using Argon2
-	key = argon2.IDKey(key, salt, config.Cfg.Crypto.ARGON2Rounds, config.Cfg.Crypto.ARGON2Mem*1024, uint8(runtime.NumCPU()), hashLength)
-
+func Encrypt(data []byte, key []byte, salt *[32]byte) []byte {
 	// Generate cipher
 	c := getCipher(config.Cfg.Crypto.Cipher, key)
 
@@ -48,7 +50,7 @@ func Encrypt(data []byte, key []byte) []byte {
 	data = cfbEncrypt(data, c)
 
 	// Append salt to the end of data
-	data = append(data, salt...)
+	data = append(data, salt[:]...)
 	return data
 }
 
@@ -57,7 +59,7 @@ func Decrypt(data []byte, key []byte) []byte {
 	salt := data[len(data)-hashLength:]
 
 	// Derive Key for decryption from ID using Argon2
-	key = argon2.IDKey(key, salt, config.Cfg.Crypto.ARGON2Rounds, config.Cfg.Crypto.ARGON2Mem*1024, uint8(runtime.NumCPU()), hashLength)
+	key = GenKey(key, salt)
 
 	// Generate cipher
 	c := getCipher(config.Cfg.Crypto.Cipher, key)
