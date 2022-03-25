@@ -17,7 +17,7 @@ import (
 const hashLength = 32
 
 func HashID(id []byte) []byte {
-	gid := argon2.IDKey(id, config.Cfg.Crypto.Salt, config.Cfg.Crypto.ARGON2Rounds, config.Cfg.Crypto.ARGON2Mem*1024, uint8(runtime.NumCPU()), hashLength)
+	gid := argon2.IDKey(id, config.Cfg.Crypto.Salt, config.Cfg.Crypto.ARGON2IDRounds, config.Cfg.Crypto.ARGON2Mem*1024, uint8(runtime.NumCPU()), hashLength)
 	return gid
 }
 

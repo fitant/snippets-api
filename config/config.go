@@ -26,6 +26,7 @@ func Load() {
 	// Crypto Defaults
 	viper.SetDefault("ARGON2_MEM", 32)
 	viper.SetDefault("ARGON2_ROUNDS", 8)
+	viper.SetDefault("ARGON2_ID_ROUNDS", 8)
 	// DB Defaults
 	viper.SetDefault("DB_NAME", "snippets-fitant")
 	viper.SetDefault("DB_PORT", "27017")
@@ -52,6 +53,7 @@ func Load() {
 			Salt:         []byte(viper.GetString("SALT")),
 			ARGON2Mem:    viper.GetUint32("ARGON2_MEM"),
 			ARGON2Rounds: viper.GetUint32("ARGON2_ROUNDS"),
+			ARGON2IDRounds: viper.GetUint32("ARGON2_ID_ROUNDS"),
 		},
 		DB: DB{
 			kind:           viper.GetString("DB_TYPE"),

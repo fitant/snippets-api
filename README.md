@@ -93,6 +93,7 @@ Configuration is done through environment variables
 | CIPHER_UNTESTED | boolean        | Enable Untested Ciphers             | If using SEAT | false   |
 | ARGON2_MEM      | number         | ARGON2 Memory / space param in MB   | no            | 32      |
 | ARGON2_ROUNDS   | number         | ARGON2 rounds / iterations param    | no            | 8       |
+| ARGON2_ID_ROUNDS| number         | ARGON2 rounds for ID generation     | no            | 8       |
 
 #### Database Config:
 
