@@ -8,28 +8,27 @@ import (
 	"runtime"
 
 	"github.com/Sid-Sun/seaturtle"
+	"github.com/fitant/xbin-api/config"
 	"github.com/fitant/xbin-api/src/types"
 	"golang.org/x/crypto/argon2"
 )
 
-// Hardcoded ARGON2 Parameters
-// 16 iterations for ID generatioon
-// Higher as SALT is not unique per app instance
-const idHashIterations = 16
-
-// 12 iterations for encryption key
-// Unique Salt is used for keys
-const keyHashIterations = 12
-
-// 64 MB Memory Space
-const hashMemorySpace = 64
-
 // Output hash length
 const hashLength = 32
 
-func HashID(id []byte, salt []byte) []byte {
-	gid := argon2.IDKey(id, salt, idHashIterations, hashMemorySpace*1024, uint8(runtime.NumCPU()), hashLength)
+func HashID(id []byte) []byte {
+	gid := argon2.IDKey(id, config.Cfg.Crypto.Salt, config.Cfg.Crypto.ARGON2Rounds, config.Cfg.Crypto.ARGON2Mem*1024, uint8(runtime.NumCPU()), hashLength)
 	return gid
+}
+
+func GenSalt() *[32]byte {
+	salt := new([32]byte)
+	io.ReadFull(rand.Reader, salt[:])
+	return salt
+}
+
+func GenKey(key, salt []byte) []byte {
+	return argon2.IDKey(key, salt, config.Cfg.Crypto.ARGON2Rounds, config.Cfg.Crypto.ARGON2Mem*1024, uint8(runtime.NumCPU()), hashLength)
 }
 
 func getCipher(selection types.CipherSelection, key []byte) cipher.Block {
@@ -43,35 +42,27 @@ func getCipher(selection types.CipherSelection, key []byte) cipher.Block {
 	return c
 }
 
-func Encrypt(data []byte, key []byte, cphSel types.CipherSelection) []byte {
-	salt := make([]byte, hashLength)
-	// Read random values from crypto/rand for key salt
-	// Error can be safely ignored
-	io.ReadFull(rand.Reader, salt)
-
-	// Derive Key for encryption from ID using Argon2
-	key = argon2.IDKey(key, salt, keyHashIterations, hashMemorySpace*1024, uint8(runtime.NumCPU()), hashLength)
-
+func Encrypt(data []byte, key []byte, salt *[32]byte) []byte {
 	// Generate cipher
-	c := getCipher(cphSel, key)
+	c := getCipher(config.Cfg.Crypto.Cipher, key)
 
 	// use CFB to encrypt full data
 	data = cfbEncrypt(data, c)
 
 	// Append salt to the end of data
-	data = append(data, salt...)
+	data = append(data, salt[:]...)
 	return data
 }
 
-func Decrypt(data []byte, key []byte, cphSel types.CipherSelection) []byte {
+func Decrypt(data []byte, key []byte) []byte {
 	// Read the salt from end of data
 	salt := data[len(data)-hashLength:]
 
 	// Derive Key for decryption from ID using Argon2
-	key = argon2.IDKey(key, salt, keyHashIterations, hashMemorySpace*1024, uint8(runtime.NumCPU()), hashLength)
+	key = GenKey(key, salt)
 
 	// Generate cipher
-	c := getCipher(cphSel, key)
+	c := getCipher(config.Cfg.Crypto.Cipher, key)
 
 	// Send IV and data bits to decrypt via CFB
 	data = cfbDecrypt(data[:len(data)-hashLength], c)

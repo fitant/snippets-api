@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-
 func StructToBSON(obj interface{}) ([]byte, error) {
 	data, err := bson.Marshal(obj)
 	if err != nil {

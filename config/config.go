@@ -8,18 +8,24 @@ import (
 )
 
 type Config struct {
-	App  app
-	Svc  Service
-	DB   DB
-	Http HTTPServerConfig
+	App    app
+	Svc    Service
+	DB     DB
+	Http   HTTPServerConfig
+	Crypto Crypto
 }
 
-func Load() *Config {
+var Cfg *Config
+
+func Load() {
 	viper.GetViper().AutomaticEnv()
 	// App Defaults
 	viper.SetDefault("ENV", "dev")
 	viper.SetDefault("LOG_LEVEL", "debug")
 	viper.SetDefault("CIPHER", "AES")
+	// Crypto Defaults
+	viper.SetDefault("ARGON2_MEM", 32)
+	viper.SetDefault("ARGON2_ROUNDS", 8)
 	// DB Defaults
 	viper.SetDefault("DB_NAME", "snippets-fitant")
 	viper.SetDefault("DB_PORT", "27017")
@@ -40,8 +46,12 @@ func Load() *Config {
 			ll:  viper.GetString("LOG_LEVEL"),
 		},
 		Svc: Service{
-			Salt:      []byte(viper.GetString("SALT")),
 			Overrides: make(map[string]string),
+		},
+		Crypto: Crypto{
+			Salt:         []byte(viper.GetString("SALT")),
+			ARGON2Mem:    viper.GetUint32("ARGON2_MEM"),
+			ARGON2Rounds: viper.GetUint32("ARGON2_ROUNDS"),
 		},
 		DB: DB{
 			kind:           viper.GetString("DB_TYPE"),
@@ -71,12 +81,12 @@ func Load() *Config {
 	switch viper.GetString("CIPHER") {
 	case "SEAT":
 		if viper.GetBool("CIPHER_UNTESTED") {
-			cfg.Svc.Cipher = types.SeaTurtle
+			cfg.Crypto.Cipher = types.SeaTurtle
 			break
 		}
 		fallthrough
 	default:
-		cfg.Svc.Cipher = types.AES
+		cfg.Crypto.Cipher = types.AES
 	}
 
 	overrides := viper.GetString("OVERRIDES")
@@ -87,5 +97,9 @@ func Load() *Config {
 		}
 	}
 
-	return cfg
+	if len(cfg.Crypto.Salt) == 0 {
+		panic("config missing: salt not provided")
+	}
+
+	Cfg = cfg
 }

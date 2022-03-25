@@ -79,7 +79,7 @@ func (db *MongoFindInsert) InsertOne(document []byte, eph bool) (*mongo.InsertOn
 
 	ctx, cancel := context.WithTimeout(context.Background(), db.timeout)
 	defer cancel()
-	
+
 	res, err := collection.InsertOne(ctx, document)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
