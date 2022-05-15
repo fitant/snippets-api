@@ -16,7 +16,7 @@ func populateEncryptionStack(idSize int) {
 			Salt: utils.GenSalt(),
 		}
 		id := []byte(x.ID)
-		x.Hash = base64.StdEncoding.EncodeToString(utils.HashID(id))
+		x.Hash = base64.URLEncoding.EncodeToString(utils.HashID(id))
 		x.Key = utils.GenKey(id, x.Salt[:])
 		encryptionKeys <- x
 	}
