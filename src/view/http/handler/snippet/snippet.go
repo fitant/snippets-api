@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/fitant/xbin-api/config"
-	"github.com/fitant/xbin-api/src/db"
 	"github.com/fitant/xbin-api/src/service"
 	"github.com/fitant/xbin-api/src/view/http/contract"
 	"github.com/go-chi/chi/v5"
@@ -16,14 +15,14 @@ func Create(svc service.Service, cfg *config.HTTPServerConfig) http.HandlerFunc 
 	return func(w http.ResponseWriter, req *http.Request) {
 		data := req.Context().Value(contract.CS).(contract.CreateSnippet)
 
-		snippet, err := svc.CreateSnippet(data.Data.Snippet, data.Metadata.Language, data.Metadata.Ephemeral)
+		snippetID, err := svc.CreateSnippet(data.Data.Snippet, data.Metadata.Language, data.Metadata.Ephemeral)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
 		resp := contract.CreateSnippetResponse{
-			URL: fmt.Sprintf(cfg.GetBaseURL(), snippet.ID),
+			URL: fmt.Sprintf(cfg.GetBaseURL(), snippetID),
 		}
 
 		raw, _ := json.Marshal(resp)
@@ -38,7 +37,7 @@ func Get(svc service.Service, responseType string) http.HandlerFunc {
 
 		snippet, err := svc.FetchSnippet(snippetID)
 		if err != nil {
-			if err == db.ErrNoDocuments {
+			if err == service.ErrNotFound {
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
@@ -47,16 +46,16 @@ func Get(svc service.Service, responseType string) http.HandlerFunc {
 		}
 
 		if responseType == "raw" {
-			w.Write([]byte(snippet.Snippet))
+			w.Write(snippet.Snippet)
 			return
 		}
 
 		resp := contract.CreateSnippet{
 			Data: contract.Data{
-				Snippet: snippet.Snippet,
+				Snippet: string(snippet.Snippet),
 			},
 			Metadata: contract.Metadata{
-				Language:  snippet.Language,
+				Language:  "plaintext",
 				Ephemeral: snippet.Ephemeral,
 			},
 		}

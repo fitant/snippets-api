@@ -95,19 +95,14 @@ Configuration is done through environment variables
 | ARGON2_ROUNDS   | number         | ARGON2 rounds / iterations param    | no            | 8       |
 | ARGON2_ID_ROUNDS| number         | ARGON2 rounds for ID generation     | no            | 8       |
 
-#### Database Config:
+#### AWS S3 Config:
 
-| Name          | Type / Options                    | Description                                                                                      | Required | Default         |
-|---------------|-----------------------------------|--------------------------------------------------------------------------------------------------|----------|-----------------|
-| DB_TYPE       | dnsseed / replicaset / standalone | MongoDB instance type refer [docs](https://docs.mongodb.com/manual/reference/connection-string/) | no       | standalone      |
-| DB_RSNAME     | string                            | Replica Set name if using replicaset instance                                                    | no       | rs0             |
-| DB_TIMEOUT    | number                            | Database connection timeout in seconds                                                           | no       | 10              |
-| DB_USER       | string                            | Database username                                                                                | yes      |                 |
-| DB_PASS       | string                            | Database password                                                                                | yes      |                 |
-| DB_HOST       | string                            | DB listen host                                                                                   | yes      |                 |
-| DB_PORT       | string                            | DB listen port                                                                                   | no       | 27017           |
-| DB_NAME       | string                            | database name to use for snippets                                                                | no       | snippets-fitant |
-| DB_MIGRATIONS | string                            | Relative path to folder containing DB migration files                                            | no       | migrations      |
+| Name           | Type   | Description                        | Required |
+|----------------|--------|------------------------------------|----------|
+| AWS_ACCESS_KEY | string | AWS Programmatic Access Key / ID   | yes      |
+| AWS_SECRET_KEY | string | Associated Programmatic Secret Key | yes      |
+| AWS_REGION     | string | AWS Hosting Region                 | yes      |
+| AWS_S3_BUCKET  | string | S3 Bucket Name                     | yes      |
 
 #### HTTP Server Config:
 

@@ -5,14 +5,15 @@ import (
 	"fmt"
 
 	"github.com/fitant/xbin-api/config"
-	"github.com/fitant/xbin-api/src/db"
 	"github.com/fitant/xbin-api/src/model"
 	"github.com/fitant/xbin-api/src/types"
 	"github.com/fitant/xbin-api/src/utils"
 )
 
+var ErrNotFound = model.ErrNotFound
+
 type Service interface {
-	CreateSnippet(snippet, language string, ephemeral bool) (*model.Snippet, error)
+	CreateSnippet(snippet, language string, ephemeral bool) (string, error)
 	FetchSnippet(id string) (*model.Snippet, error)
 }
 
@@ -30,23 +31,19 @@ func NewSnippetService(sc model.SnippetController, cfg config.Service) Service {
 	}
 }
 
-func (s *serviceImpl) CreateSnippet(snippet, language string, ephemeral bool) (*model.Snippet, error) {
+func (s *serviceImpl) CreateSnippet(snippet, language string, ephemeral bool) (string, error) {
 	keys := <-encryptionKeys
 
 	// Deflate snippet -> Encrypt snippet -> encode snippet
 	compressedSnippet := utils.DefalteBrotli([]byte(snippet))
 	encryptedSnippet := utils.Encrypt(compressedSnippet, keys.Key, keys.Salt)
-	snip, err := s.sc.NewSnippet(keys.Hash, base64.StdEncoding.EncodeToString(encryptedSnippet),
-		language, ephemeral)
+	err := s.sc.NewSnippet(keys.Hash, language, ephemeral, encryptedSnippet)
 	if err != nil {
 		utils.Logger.Error(fmt.Sprintf("%s : %v", "[Service] [CreateSnippet] [NewSnippet]", err))
-		return nil, err
+		return "", err
 	}
 
-	// Return generated ID instead of the stored hashed ID
-	snip.ID = keys.ID
-
-	return snip, nil
+	return keys.ID, nil
 }
 
 func (s *serviceImpl) FetchSnippet(id string) (*model.Snippet, error) {
@@ -57,16 +54,15 @@ func (s *serviceImpl) FetchSnippet(id string) (*model.Snippet, error) {
 	encodedID := base64.StdEncoding.EncodeToString(hashedID)
 	snip, err := s.sc.FindSnippet(encodedID)
 	if err != nil {
-		if err != db.ErrNoDocuments {
+		if err != model.ErrNotFound {
 			utils.Logger.Error(fmt.Sprintf("%s : %v", "[Service] [FetchSnippet] [FindSnippet]", err))
 		}
 		return nil, err
 	}
 
 	// Decode snippet -> Decrypt snippet -> inflate snippet
-	encryptedSnippet, _ := base64.StdEncoding.DecodeString(snip.Snippet)
-	decryptedSnippet := utils.Decrypt(encryptedSnippet, []byte(id))
-	snip.Snippet = string(utils.InflateBrotli(decryptedSnippet))
+	decryptedSnippet := utils.Decrypt(snip.Snippet, []byte(id))
+	snip.Snippet = utils.InflateBrotli(decryptedSnippet)
 
 	// Return generated ID instead of the stored hashed ID
 	snip.ID = id
